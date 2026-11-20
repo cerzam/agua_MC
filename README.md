@@ -3,9 +3,9 @@
 Aplicación móvil para administrar la venta de garrafones: ventas, cobros, deudas, abonos,
 gastos y estadísticas. Construida con Expo, React Native, TypeScript, Expo Router y Firebase.
 
-> Estado actual: **ETAPA 2 — dashboard real, ventas, gastos y abonos conectados a Firestore**.
-> Los módulos restantes (clientes, estadísticas avanzadas y configuración editable) se conectan
-> en etapas posteriores. No hay datos ficticios ni botones sin funcionalidad.
+> Estado actual: **ETAPA 3 — clientes con ficha, saldos e historial conectado a Firestore**.
+> Quedan para etapas posteriores las estadísticas avanzadas y la configuración editable.
+> No hay datos ficticios ni botones sin funcionalidad.
 
 ---
 
@@ -53,7 +53,10 @@ src/
 │   │   ├── index.tsx       # Historial y eliminación
 │   │   └── nuevo.tsx
 │   ├── abonos/nuevo.tsx    # Cobro de deudas
-│   ├── clientes.tsx
+│   ├── clientes/           # Pestaña con Stack propio
+│   │   ├── index.tsx       # Lista con búsqueda y saldos
+│   │   ├── nuevo.tsx
+│   │   └── [id]/           # Ficha + historial + edición
 │   ├── estadisticas.tsx
 │   └── configuracion.tsx
 ├── components/
@@ -81,7 +84,7 @@ firebase/
 - **`NativeTabs`** solo funciona en Expo SDK 58+; cada pestaña con historial usa un `Stack` anidado.
 - **Operaciones financieras atómicas** con `runTransaction` e IDs generados en la UI para idempotencia.
 
-La guía de prueba de esta etapa está en [`docs/ETAPA_2.md`](docs/ETAPA_2.md).
+Guías de prueba: [`docs/ETAPA_2.md`](docs/ETAPA_2.md) y [`docs/ETAPA_3.md`](docs/ETAPA_3.md).
 
 ## Git
 
