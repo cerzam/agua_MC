@@ -1,0 +1,239 @@
+rules_version = '2';
+
+// Agua MC - Reglas de Cloud Firestore
+//
+// Principios:
+// - Nadie puede leer o escribir datos que no pertenezca a su UID.
+// - No hay reglas abiertas (allow read, write: if true).
+// - Los importes son enteros en centavos y siempre positivos.
+// - El historial de pagos es inmutable: se crea, nunca se edita ni se borra.
+// - El saldo de un cliente se deriva de los movimientos, no se fia del cliente.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function isPositiveInt(value) {
+      return value is int && value > 0;
+    }
+
+    function isNonNegativeInt(value) {
+      return value is int && value >= 0;
+    }
+
+    function isText(value, maxLength) {
+      return value is string && value.size() > 0 && value.size() <= maxLength;
+    }
+
+    function isOptionalText(value, maxLength) {
+      return value == null || (value is string && value.size() <= maxLength);
+    }
+
+    function settingsData() {
+      return request.resource.data;
+    }
+
+    function customerData() {
+      return request.resource.data;
+    }
+
+    function saleData() {
+      return request.resource.data;
+    }
+
+    function paymentData() {
+      return request.resource.data;
+    }
+
+    function expenseData() {
+      return request.resource.data;
+    }
+
+    match /users/{uid} {
+      match /settings/business {
+        allow read: if isOwner(uid);
+
+        allow create: if isOwner(uid)
+          && settingsData().keys().hasAll([
+            'businessName', 'pricePerBottleCents', 'currency',
+            'dateFormat', 'appearance', 'createdAt', 'updatedAt'
+          ])
+          && settingsData().keys().hasOnly([
+            'businessName', 'pricePerBottleCents', 'currency',
+            'dateFormat', 'appearance', 'createdAt', 'updatedAt'
+          ])
+          && isText(settingsData().businessName, 100)
+          && isPositiveInt(settingsData().pricePerBottleCents)
+          && settingsData().currency in ['MXN']
+          && settingsData().dateFormat in ['dd/MM/yyyy', 'yyyy-MM-dd', 'MM/dd/yyyy']
+          && settingsData().appearance in ['system', 'light', 'dark']
+          && settingsData().createdAt == request.time
+          && settingsData().updatedAt == request.time;
+
+        allow update: if isOwner(uid)
+          && settingsData().keys().hasAll([
+            'businessName', 'pricePerBottleCents', 'currency',
+            'dateFormat', 'appearance', 'createdAt', 'updatedAt'
+          ])
+          && settingsData().keys().hasOnly([
+            'businessName', 'pricePerBottleCents', 'currency',
+            'dateFormat', 'appearance', 'createdAt', 'updatedAt'
+          ])
+          && isText(settingsData().businessName, 100)
+          && isPositiveInt(settingsData().pricePerBottleCents)
+          && settingsData().currency in ['MXN']
+          && settingsData().dateFormat in ['dd/MM/yyyy', 'yyyy-MM-dd', 'MM/dd/yyyy']
+          && settingsData().appearance in ['system', 'light', 'dark']
+          && settingsData().createdAt == resource.data.createdAt
+          && settingsData().updatedAt == request.time;
+
+        allow delete: if false;
+      }
+
+      match /customers/{customerId} {
+        allow read: if isOwner(uid);
+
+        allow create: if isOwner(uid)
+          && customerData().keys().hasAll([
+            'name', 'phone', 'notes', 'balanceCents', 'createdAt', 'updatedAt'
+          ])
+          && customerData().keys().hasOnly([
+            'name', 'phone', 'notes', 'balanceCents', 'createdAt', 'updatedAt'
+          ])
+          && isText(customerData().name, 120)
+          && isOptionalText(customerData().phone, 40)
+          && isOptionalText(customerData().notes, 500)
+          && isNonNegativeInt(customerData().balanceCents)
+          && customerData().createdAt == request.time
+          && customerData().updatedAt == request.time;
+
+        allow update: if isOwner(uid)
+          && customerData().keys().hasAll([
+            'name', 'phone', 'notes', 'balanceCents', 'createdAt', 'updatedAt'
+          ])
+          && customerData().keys().hasOnly([
+            'name', 'phone', 'notes', 'balanceCents', 'createdAt', 'updatedAt'
+          ])
+          && isText(customerData().name, 120)
+          && isOptionalText(customerData().phone, 40)
+          && isOptionalText(customerData().notes, 500)
+          && isNonNegativeInt(customerData().balanceCents)
+          && customerData().createdAt == resource.data.createdAt
+          && customerData().updatedAt == request.time;
+
+        allow delete: if false;
+      }
+
+      match /sales/{saleId} {
+        allow read: if isOwner(uid);
+
+        allow create: if isOwner(uid)
+          && saleData().keys().hasAll([
+            'customerId', 'customerName', 'quantity', 'unitPriceCents',
+            'totalCents', 'paidCents', 'paymentStatus', 'createdAt', 'updatedAt'
+          ])
+          && saleData().keys().hasOnly([
+            'customerId', 'customerName', 'quantity', 'unitPriceCents',
+            'totalCents', 'paidCents', 'paymentStatus', 'createdAt', 'updatedAt'
+          ])
+          && saleData().quantity is int
+          && saleData().quantity > 0
+          && isPositiveInt(saleData().unitPriceCents)
+          && isPositiveInt(saleData().totalCents)
+          && saleData().totalCents == saleData().quantity * saleData().unitPriceCents
+          && isNonNegativeInt(saleData().paidCents)
+          && saleData().paidCents <= saleData().totalCents
+          && saleData().paymentStatus in ['paid', 'partial', 'unpaid']
+          && (saleData().customerId == null || saleData().customerId is string)
+          && isOptionalText(saleData().customerName, 120)
+          && (saleData().paymentStatus != 'paid' || saleData().customerId is string)
+          && (saleData().paymentStatus != 'paid' || saleData().paidCents == saleData().totalCents)
+          && (saleData().paymentStatus != 'unpaid' || saleData().paidCents == 0)
+          && saleData().createdAt == request.time
+          && saleData().updatedAt == request.time;
+
+        allow update: if isOwner(uid)
+          && saleData().keys().hasAll([
+            'customerId', 'customerName', 'quantity', 'unitPriceCents',
+            'totalCents', 'paidCents', 'paymentStatus', 'createdAt', 'updatedAt'
+          ])
+          && saleData().keys().hasOnly([
+            'customerId', 'customerName', 'quantity', 'unitPriceCents',
+            'totalCents', 'paidCents', 'paymentStatus', 'createdAt', 'updatedAt'
+          ])
+          && saleData().createdAt == resource.data.createdAt
+          && saleData().updatedAt == request.time
+          && saleData().quantity == resource.data.quantity
+          && saleData().unitPriceCents == resource.data.unitPriceCents
+          && saleData().totalCents == resource.data.totalCents
+          && saleData().paidCents >= resource.data.paidCents
+          && saleData().paidCents <= saleData().totalCents
+          && saleData().paymentStatus in ['paid', 'partial', 'unpaid']
+          && saleData().customerId == resource.data.customerId;
+
+        allow delete: if false;
+      }
+
+      match /payments/{paymentId} {
+        allow read: if isOwner(uid);
+
+        allow create: if isOwner(uid)
+          && paymentData().keys().hasAll([
+            'customerId', 'saleId', 'amountCents', 'type', 'createdAt'
+          ])
+          && paymentData().keys().hasOnly([
+            'customerId', 'saleId', 'amountCents', 'type', 'createdAt'
+          ])
+          && isText(paymentData().customerId, 100)
+          && (paymentData().saleId == null || paymentData().saleId is string)
+          && isPositiveInt(paymentData().amountCents)
+          && paymentData().type in ['sale_payment', 'debt_payment']
+          && paymentData().createdAt == request.time;
+
+        // El historial de cobros jamás se reescribe para "arreglar" un saldo.
+        allow update, delete: if false;
+      }
+
+      match /expenses/{expenseId} {
+        allow read: if isOwner(uid);
+
+        allow create: if isOwner(uid)
+          && expenseData().keys().hasAll([
+            'concept', 'amountCents', 'category', 'description', 'createdAt', 'updatedAt'
+          ])
+          && expenseData().keys().hasOnly([
+            'concept', 'amountCents', 'category', 'description', 'createdAt', 'updatedAt'
+          ])
+          && isText(expenseData().concept, 150)
+          && isPositiveInt(expenseData().amountCents)
+          && expenseData().category in [
+            'Gasolina', 'Mantenimiento', 'Compras', 'Servicios', 'Otros'
+          ]
+          && expenseData().description is string
+          && expenseData().description.size() <= 500
+          && expenseData().createdAt == request.time
+          && expenseData().updatedAt == request.time;
+
+        allow update: if isOwner(uid)
+          && expenseData().keys().hasAll([
+            'concept', 'amountCents', 'category', 'description', 'createdAt', 'updatedAt'
+          ])
+          && expenseData().keys().hasOnly([
+            'concept', 'amountCents', 'category', 'description', 'createdAt', 'updatedAt'
+          ])
+          && isText(expenseData().concept, 150)
+          && isPositiveInt(expenseData().amountCents)
+          && expenseData().category in [
+            'Gasolina', 'Mantenimiento', 'Compras', 'Servicios', 'Otros'
+          ]
+          && expenseData().description is string
+          && expenseData().description.size() <= 500
+          && expenseData().createdAt == resource.data.createdAt
+          && expenseData().updatedAt == request.time;
+
+        allow delete: if isOwner(uid);
+      }
+    }
+  }
+}

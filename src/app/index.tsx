@@ -1,98 +1,162 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Link } from 'expo-router';
+import {
+  ArrowRight,
+  CircleDollarSign,
+  Clock3,
+  Droplets,
+  Package,
+  Receipt,
+  TrendingUp,
+  Wallet,
+} from 'lucide-react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { Card } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { MetricCard } from '@/components/ui/metric-card';
+import { Screen } from '@/components/ui/screen';
+import { SectionHeader } from '@/components/ui/section-header';
+import { AppText } from '@/components/ui/text';
+import { Radius, Spacing } from '@/constants/theme';
+import { useBusinessSettings } from '@/hooks/use-business-settings';
+import { useTheme } from '@/hooks/use-theme';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+const ICON_SIZE = 20;
 
 export default function HomeScreen() {
+  const theme = useTheme();
+  const { settings, loading } = useBusinessSettings();
+
+  const businessName = settings?.businessName ?? 'Agua MC';
+  const today = new Date().toLocaleDateString('es-MX', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <Screen>
+      <View style={styles.header}>
+        <View style={[styles.brandIcon, { backgroundColor: theme.primary }]}>
+          <Droplets size={24} color={theme.textOnPrimary} />
+        </View>
+        <View style={styles.headerText}>
+          <AppText variant="caption" tone="secondary">
+            {today}
+          </AppText>
+          <AppText variant="heading">{loading ? 'Agua MC' : businessName}</AppText>
+        </View>
+      </View>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+      <SectionHeader
+        title="Resumen de hoy"
+        subtitle="Los datos aparecerán cuando registres movimientos"
+      />
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+      <View style={styles.metricsGrid}>
+        <MetricCard
+          label="Garrafones vendidos"
+          value="—"
+          icon={<Package size={ICON_SIZE} color={theme.primary} />}
+        />
+        <MetricCard
+          label="Importe de ventas"
+          value="—"
+          icon={<CircleDollarSign size={ICON_SIZE} color={theme.primary} />}
+        />
+        <MetricCard
+          label="Dinero cobrado"
+          value="—"
+          tone="success"
+          icon={<Wallet size={ICON_SIZE} color={theme.success} />}
+        />
+        <MetricCard
+          label="Pendiente de cobrar"
+          value="—"
+          tone="warning"
+          icon={<Clock3 size={ICON_SIZE} color={theme.warning} />}
+        />
+        <MetricCard
+          label="Gastos registrados"
+          value="—"
+          tone="danger"
+          icon={<Receipt size={ICON_SIZE} color={theme.danger} />}
+        />
+      </View>
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      <Link href="/gastos" style={[styles.expenseLink, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+        <View style={styles.expenseLinkContent}>
+          <Receipt size={ICON_SIZE} color={theme.primary} />
+          <View>
+            <AppText variant="label">Gastos del negocio</AppText>
+            <AppText variant="caption" tone="secondary">
+              Registra y consulta tus gastos
+            </AppText>
+          </View>
+        </View>
+        <ArrowRight size={18} color={theme.textSecondary} />
+      </Link>
+
+      <Card>
+        <SectionHeader title="Movimientos recientes" subtitle="Ventas, pagos y gastos" />
+        <EmptyState
+          title="Aún no hay movimientos"
+          description="Cuando registres ventas, abonos o gastos aparecerán aquí en orden cronológico."
+        />
+      </Card>
+
+      <Card>
+        <SectionHeader title="Resumen de la semana" subtitle="Garrafones vendidos por día" />
+        <View style={styles.weekPlaceholder}>
+          <TrendingUp size={28} color={theme.accent} />
+        </View>
+        <EmptyState
+          title="Sin datos semanales"
+          description="Esta gráfica se llenará con las ventas reales de Firestore."
+        />
+      </Card>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
+  header: {
     flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
     alignItems: 'center',
     gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    marginBottom: Spacing.one,
   },
-  heroSection: {
+  brandIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: Radius.md,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  headerText: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    gap: Spacing.half,
   },
-  title: {
-    textAlign: 'center',
+  metricsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.two,
   },
-  code: {
-    textTransform: 'uppercase',
+  expenseLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: Spacing.three,
+    borderRadius: Radius.md,
+    borderWidth: 1,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  expenseLinkContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  weekPlaceholder: {
+    alignItems: 'center',
+    paddingVertical: Spacing.two,
   },
 });

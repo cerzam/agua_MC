@@ -1,26 +1,45 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://unistyl.es/), etc.
- */
-
 import '@/global.css';
 
 import { Platform } from 'react-native';
 
+/**
+ * Paleta institucional de Agua MC.
+ * Azul como color principal, celeste como acento y fondos claros.
+ */
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    primary: '#0B69D6',
+    primaryDark: '#084FA6',
+    primarySoft: '#E7F2FE',
+    accent: '#49B4EF',
+    background: '#F4F8FC',
+    surface: '#FFFFFF',
+    surfaceMuted: '#EDF4FB',
+    border: '#D9E6F3',
+    text: '#102A43',
+    textSecondary: '#5D7388',
+    textOnPrimary: '#FFFFFF',
+    success: '#16865A',
+    warning: '#B7791F',
+    danger: '#C8404E',
+    shadowColor: '#0B1F33',
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    primary: '#5BA9FF',
+    primaryDark: '#3B8CE8',
+    primarySoft: '#132A42',
+    accent: '#63C4F5',
+    background: '#0B1622',
+    surface: '#142335',
+    surfaceMuted: '#1B3049',
+    border: '#29415C',
+    text: '#EAF2FA',
+    textSecondary: '#9DB2C6',
+    textOnPrimary: '#071321',
+    success: '#4BD39A',
+    warning: '#F0BC63',
+    danger: '#FF7B87',
+    shadowColor: '#000000',
   },
 } as const;
 
@@ -28,13 +47,9 @@ export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {
@@ -61,5 +76,11 @@ export const Spacing = {
   six: 64,
 } as const;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
-export const MaxContentWidth = 800;
+export const Radius = {
+  sm: 10,
+  md: 16,
+  lg: 22,
+  pill: 999,
+} as const;
+
+export const MaxContentWidth = 640;

@@ -1,56 +1,80 @@
-# Welcome to your Expo app 👋
+# Agua MC
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicación móvil para administrar la venta de garrafones: ventas, cobros, deudas, abonos,
+gastos y estadísticas. Construida con Expo, React Native, TypeScript, Expo Router y Firebase.
 
-## Get started
+> Estado actual: **ETAPA 1 — arquitectura, autenticación, navegación y sistema visual**.
+> Los módulos de negocio se conectan por etapas. Las pantallas sin lógica muestran su estado
+> honestamente y no contienen datos ficticios ni botones que no hacen nada.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## Requisitos
 
-2. Start the app
+- Node 22 LTS o superior (recomendado; Expo SDK 58 es compatible con 22.13+, 24.3+ o 26+).
+- npm (el proyecto incluye `package-lock.json`).
+- Cuenta de Firebase.
+- Expo Go, simulador de iOS o emulador de Android.
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Instalación
 
 ```bash
-npm run reset-project
+npm install
+cp .env.example .env      # completa los valores de Firebase
+npx expo start -c
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+Consulta [`docs/FIREBASE_SETUP.md`](docs/FIREBASE_SETUP.md) para crear el proyecto, activar la
+autenticación anónima y publicar las reglas y los índices de Firestore.
 
-### Other setup steps
+## Scripts
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+| Comando | Descripción |
+| --- | --- |
+| `npx expo start` | Inicia Metro |
+| `npx expo start -c` | Inicia limpiando la caché (necesario tras cambiar `.env`) |
+| `npx expo start --ios` / `--android` | Abre en simulador/emulador |
+| `npm run lint` | ESLint con la configuración de Expo |
+| `npm run typecheck` | Verificación de TypeScript sin emitir archivos |
+| `npx expo-doctor` | Revisión de dependencias y configuración |
 
-## Learn more
+## Estructura
 
-To learn more about developing your project with Expo, look at the following resources:
+```
+src/
+├── app/                    # Rutas (Expo Router). Una pantalla por archivo.
+│   ├── _layout.tsx         # Providers, gate de sesión y navegación
+│   ├── index.tsx           # Inicio / dashboard
+│   ├── ventas.tsx
+│   ├── clientes.tsx
+│   ├── estadisticas.tsx
+│   ├── configuracion.tsx
+│   └── gastos.tsx          # Accesible desde Inicio (no ocupa una pestaña)
+├── components/
+│   ├── ui/                 # Text, Card, Button, Screen, MetricCard, etc.
+│   ├── app-gate.tsx        # Carga / configuración requerida
+│   └── app-tabs.tsx        # NativeTabs (5 secciones)
+├── config/firebase.ts      # Inicialización condicional de Firebase
+├── constants/              # Tema, paleta y valores de negocio
+├── hooks/                  # Sesión, tema y configuración
+├── lib/                    # Dinero (centavos) y fechas
+├── services/               # Acceso a Firestore por dominio
+└── types/models.ts         # Esquemas de datos
+firebase/
+├── firestore.rules         # Seguridad por UID y validaciones
+└── firestore.indexes.json  # Índices compuestos
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Decisiones técnicas
 
-## Join the community
+- **SDK de Firebase JS** en lugar de React Native Firebase para mantener compatibilidad con Expo Go.
+- **Autenticación anónima persistente** con `AsyncStorage`; sin pantalla de login.
+- **Importes en centavos enteros** para evitar errores de precisión decimal.
+- **Datos por usuario** en `users/{uid}/...`, protegidos por `request.auth.uid`.
+- **Barra inferior nativa** (`expo-router/native-tabs`): SF Symbols en iOS y Material Symbols en Android.
+- **`NativeTabs`** solo funciona en Expo SDK 58+.
 
-Join our community of developers creating universal apps.
+## Git
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+La rama `main` no se usa para desarrollo. Cada etapa se trabaja en su propia rama y se commitea
+solo tras revisar los cambios. No se han subido credenciales ni secretos al repositorio.
