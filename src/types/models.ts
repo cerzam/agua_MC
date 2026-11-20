@@ -53,7 +53,8 @@ export type PaymentType = 'sale_payment' | 'debt_payment';
 
 export interface Payment {
   id: string;
-  customerId: string;
+  /** null en los cobros de ventas pagadas sin cliente. */
+  customerId: string | null;
   saleId: string | null;
   amountCents: number;
   type: PaymentType;

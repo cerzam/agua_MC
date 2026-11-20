@@ -3,9 +3,9 @@
 Aplicación móvil para administrar la venta de garrafones: ventas, cobros, deudas, abonos,
 gastos y estadísticas. Construida con Expo, React Native, TypeScript, Expo Router y Firebase.
 
-> Estado actual: **ETAPA 1 — arquitectura, autenticación, navegación y sistema visual**.
-> Los módulos de negocio se conectan por etapas. Las pantallas sin lógica muestran su estado
-> honestamente y no contienen datos ficticios ni botones que no hacen nada.
+> Estado actual: **ETAPA 2 — dashboard real, ventas, gastos y abonos conectados a Firestore**.
+> Los módulos restantes (clientes, estadísticas avanzadas y configuración editable) se conectan
+> en etapas posteriores. No hay datos ficticios ni botones sin funcionalidad.
 
 ---
 
@@ -44,12 +44,18 @@ autenticación anónima y publicar las reglas y los índices de Firestore.
 src/
 ├── app/                    # Rutas (Expo Router). Una pantalla por archivo.
 │   ├── _layout.tsx         # Providers, gate de sesión y navegación
-│   ├── index.tsx           # Inicio / dashboard
-│   ├── ventas.tsx
+│   ├── index.tsx           # Inicio / dashboard con datos reales
+│   ├── ventas/             # Pestaña con Stack propio
+│   │   ├── index.tsx       # Historial y filtros
+│   │   ├── nueva.tsx       # Alta de venta
+│   │   └── [id].tsx        # Detalle y cobros
+│   ├── gastos/             # Accesible desde Inicio (no ocupa pestaña)
+│   │   ├── index.tsx       # Historial y eliminación
+│   │   └── nuevo.tsx
+│   ├── abonos/nuevo.tsx    # Cobro de deudas
 │   ├── clientes.tsx
 │   ├── estadisticas.tsx
-│   ├── configuracion.tsx
-│   └── gastos.tsx          # Accesible desde Inicio (no ocupa una pestaña)
+│   └── configuracion.tsx
 ├── components/
 │   ├── ui/                 # Text, Card, Button, Screen, MetricCard, etc.
 │   ├── app-gate.tsx        # Carga / configuración requerida
@@ -72,7 +78,10 @@ firebase/
 - **Importes en centavos enteros** para evitar errores de precisión decimal.
 - **Datos por usuario** en `users/{uid}/...`, protegidos por `request.auth.uid`.
 - **Barra inferior nativa** (`expo-router/native-tabs`): SF Symbols en iOS y Material Symbols en Android.
-- **`NativeTabs`** solo funciona en Expo SDK 58+.
+- **`NativeTabs`** solo funciona en Expo SDK 58+; cada pestaña con historial usa un `Stack` anidado.
+- **Operaciones financieras atómicas** con `runTransaction` e IDs generados en la UI para idempotencia.
+
+La guía de prueba de esta etapa está en [`docs/ETAPA_2.md`](docs/ETAPA_2.md).
 
 ## Git
 

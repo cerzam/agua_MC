@@ -38,3 +38,22 @@ export function addDays(date: Date, days: number): Date {
   result.setDate(result.getDate() + days);
   return result;
 }
+
+export type PeriodKey = 'today' | 'week' | 'month' | 'all';
+
+/** Rango aplicable a filtros de ventas, gastos y cobros. */
+export function periodRange(period: PeriodKey): { from?: Date; to?: Date } {
+  const now = new Date();
+  const to = new Date(now);
+
+  if (period === 'today') {
+    return { from: startOfDay(now), to };
+  }
+  if (period === 'week') {
+    return { from: startOfWeek(now), to };
+  }
+  if (period === 'month') {
+    return { from: startOfMonth(now), to };
+  }
+  return {};
+}

@@ -4,7 +4,7 @@ import { Colors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 type Variant = 'title' | 'heading' | 'body' | 'caption' | 'label' | 'amount';
-type Tone = 'default' | 'secondary' | 'primary' | 'onPrimary' | 'success' | 'danger';
+type Tone = 'default' | 'secondary' | 'primary' | 'onPrimary' | 'success' | 'warning' | 'danger';
 
 const VARIANT_STYLES: Record<Variant, { fontSize: number; lineHeight: number; fontWeight: '400' | '500' | '600' | '700' }> = {
   title: { fontSize: 30, lineHeight: 36, fontWeight: '700' },
@@ -28,6 +28,7 @@ export function AppText({ variant = 'body', tone = 'default', style, ...rest }: 
     primary: theme.primary,
     onPrimary: theme.textOnPrimary,
     success: theme.success,
+    warning: theme.warning,
     danger: theme.danger,
   };
 
