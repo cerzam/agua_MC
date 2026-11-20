@@ -10,6 +10,7 @@ import { AppText } from '@/components/ui/text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
 import { useBusinessSettings } from '@/hooks/use-business-settings';
+import { useCustomers } from '@/hooks/use-customers';
 import { useTheme } from '@/hooks/use-theme';
 import { centsToInput, formatCurrency, parseAmountToCents } from '@/lib/money';
 import { newId } from '@/services/db';
@@ -18,20 +19,32 @@ import type { Customer } from '@/types/models';
 
 type SaleKind = 'paid' | 'unpaid';
 
-export function SaleForm() {
+export function SaleForm({
+  initialCustomerId,
+  initialKind,
+}: {
+  initialCustomerId?: string;
+  initialKind?: 'paid' | 'unpaid';
+} = {}) {
   const theme = useTheme();
   const router = useRouter();
   const { uid } = useAuth();
   const { settings } = useBusinessSettings();
+  const { customers } = useCustomers();
 
   const mutationId = useRef(newId('sales')).current;
   const [quantity, setQuantity] = useState('1');
   const [unitPrice, setUnitPrice] = useState('');
-  const [kind, setKind] = useState<SaleKind>('paid');
-  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [kind, setKind] = useState<SaleKind>(initialKind === 'unpaid' ? 'unpaid' : 'paid');
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [pickerVisible, setPickerVisible] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // El cliente preseleccionado se deriva de la carga asíncrona, sin efecto que fuerce renders.
+  const customer =
+    selectedCustomer ??
+    (initialCustomerId ? customers.find((item) => item.id === initialCustomerId) ?? null : null);
 
   const effectivePrice = unitPrice.trim() !== '' || !settings
     ? unitPrice
@@ -181,7 +194,7 @@ export function SaleForm() {
         selectedId={customer?.id}
         onClose={() => setPickerVisible(false)}
         onSelect={(selected) => {
-          setCustomer(selected);
+          setSelectedCustomer(selected);
           setPickerVisible(false);
         }}
       />

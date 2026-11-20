@@ -5,6 +5,7 @@ import {
   query,
   serverTimestamp,
   setDoc,
+  updateDoc,
 } from 'firebase/firestore';
 
 import type { Customer, CustomerInput } from '@/types/models';
@@ -18,6 +19,11 @@ export function mapCustomer(id: string, data: Record<string, unknown>): Customer
 export async function listCustomers(uid: string): Promise<Customer[]> {
   const snapshot = await getDocs(query(userCollection(uid, 'customers'), orderBy('name', 'asc')));
   return snapshot.docs.map((document) => mapCustomer(document.id, document.data()));
+}
+
+export async function getCustomer(uid: string, customerId: string): Promise<Customer | null> {
+  const snapshot = await getDoc(userDoc(uid, 'customers', customerId));
+  return snapshot.exists() ? mapCustomer(snapshot.id, snapshot.data()) : null;
 }
 
 export async function createCustomer(
@@ -38,6 +44,28 @@ export async function createCustomer(
       updatedAt: serverTimestamp(),
     });
   }
+
+  const saved = await getDoc(reference);
+  return mapCustomer(reference.id, saved.data() ?? {});
+}
+
+/**
+ * Edita sólo los datos de contacto. El saldo NUNCA se escribe desde la UI:
+ * se deriva de las ventas fiadas y los abonos registrados.
+ */
+export async function updateCustomer(
+  uid: string,
+  customerId: string,
+  input: CustomerInput,
+): Promise<Customer> {
+  const reference = userDoc(uid, 'customers', customerId);
+
+  await updateDoc(reference, {
+    name: input.name.trim(),
+    phone: input.phone?.trim() || null,
+    notes: input.notes?.trim() || null,
+    updatedAt: serverTimestamp(),
+  });
 
   const saved = await getDoc(reference);
   return mapCustomer(reference.id, saved.data() ?? {});
