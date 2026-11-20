@@ -1,18 +1,12 @@
-import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 
-import { firestore, firebaseConfigError } from '@/config/firebase';
 import { DEFAULT_BUSINESS_SETTINGS } from '@/constants/business';
 import type { BusinessSettings } from '@/types/models';
 
-function requireFirestore() {
-  if (!firestore) {
-    throw new Error(firebaseConfigError ?? 'Firestore no está disponible.');
-  }
-  return firestore;
-}
+import { userDoc } from './db';
 
 function settingsRef(uid: string) {
-  return doc(requireFirestore(), 'users', uid, 'settings', 'business');
+  return userDoc(uid, 'settings', 'business');
 }
 
 /** Crea la configuración inicial una sola vez, sin sobrescribir la existente. */
@@ -35,4 +29,16 @@ export async function getBusinessSettings(uid: string): Promise<BusinessSettings
     return null;
   }
   return snapshot.data() as BusinessSettings;
+}
+
+/** Actualiza el precio general; las ventas conservan su precio histórico. */
+export async function updateBottlePrice(uid: string, pricePerBottleCents: number): Promise<void> {
+  if (!Number.isInteger(pricePerBottleCents) || pricePerBottleCents <= 0) {
+    throw new Error('El precio debe ser un número entero de centavos mayor que cero.');
+  }
+  await setDoc(
+    settingsRef(uid),
+    { pricePerBottleCents, updatedAt: serverTimestamp() },
+    { merge: true },
+  );
 }

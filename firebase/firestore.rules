@@ -147,7 +147,6 @@ service cloud.firestore {
           && saleData().paymentStatus in ['paid', 'partial', 'unpaid']
           && (saleData().customerId == null || saleData().customerId is string)
           && isOptionalText(saleData().customerName, 120)
-          && (saleData().paymentStatus != 'paid' || saleData().customerId is string)
           && (saleData().paymentStatus != 'paid' || saleData().paidCents == saleData().totalCents)
           && (saleData().paymentStatus != 'unpaid' || saleData().paidCents == 0)
           && saleData().createdAt == request.time
@@ -185,7 +184,7 @@ service cloud.firestore {
           && paymentData().keys().hasOnly([
             'customerId', 'saleId', 'amountCents', 'type', 'createdAt'
           ])
-          && isText(paymentData().customerId, 100)
+          && (paymentData().customerId == null || isText(paymentData().customerId, 100))
           && (paymentData().saleId == null || paymentData().saleId is string)
           && isPositiveInt(paymentData().amountCents)
           && paymentData().type in ['sale_payment', 'debt_payment']
