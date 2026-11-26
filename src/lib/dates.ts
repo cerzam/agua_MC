@@ -1,3 +1,5 @@
+import type { DateFormat } from '@/types/models';
+
 export function startOfDay(date: Date = new Date()): Date {
   const result = new Date(date);
   result.setHours(0, 0, 0, 0);
@@ -37,6 +39,25 @@ export function addDays(date: Date, days: number): Date {
   const result = new Date(date);
   result.setDate(result.getDate() + days);
   return result;
+}
+
+/** Formatea una fecha con el formato elegido en Configuración. */
+export function formatDateWithStyle(
+  date: Date,
+  format: DateFormat,
+  includeYear = true,
+): string {
+  const year = String(date.getFullYear());
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  if (format === 'yyyy-MM-dd') {
+    return includeYear ? `${year}-${month}-${day}` : `${month}-${day}`;
+  }
+  if (format === 'MM/dd/yyyy') {
+    return includeYear ? `${month}/${day}/${year}` : `${month}/${day}`;
+  }
+  return includeYear ? `${day}/${month}/${year}` : `${day}/${month}`;
 }
 
 export type PeriodKey = 'today' | 'week' | 'month' | 'all';

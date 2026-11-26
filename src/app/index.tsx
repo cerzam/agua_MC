@@ -26,6 +26,7 @@ import { AppText } from '@/components/ui/text';
 import { Button } from '@/components/ui/button';
 import { Radius, Spacing } from '@/constants/theme';
 import { useBusinessSettings } from '@/hooks/use-business-settings';
+import { useDateFormat } from '@/hooks/use-date-format';
 import { useDashboard } from '@/hooks/use-dashboard';
 import { useTheme } from '@/hooks/use-theme';
 import { formatCurrency } from '@/lib/money';
@@ -35,6 +36,7 @@ const ICON_SIZE = 20;
 export default function HomeScreen() {
   const theme = useTheme();
   const { settings } = useBusinessSettings();
+  const formatDate = useDateFormat();
   const { data, loading, error, reload } = useDashboard();
   const firstFocus = useRef(true);
 
@@ -50,11 +52,8 @@ export default function HomeScreen() {
 
   const businessName = settings?.businessName ?? 'Agua MC';
   const currency = settings?.currency;
-  const today = new Date().toLocaleDateString('es-MX', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  });
+  const weekday = new Intl.DateTimeFormat('es-MX', { weekday: 'long' }).format(new Date());
+  const today = `${weekday}, ${formatDate(new Date())}`;
 
   if (loading && !data) {
     return (

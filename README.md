@@ -3,8 +3,7 @@
 Aplicación móvil para administrar la venta de garrafones: ventas, cobros, deudas, abonos,
 gastos y estadísticas. Construida con Expo, React Native, TypeScript, Expo Router y Firebase.
 
-> Estado actual: **ETAPA 4 — estadísticas con filtros, comparación y gráfica reales**.
-> Queda para una etapa posterior la configuración editable.
+> Estado actual: **ETAPA 5 — configuración editable conectada a Firestore**.
 > No hay datos ficticios ni botones sin funcionalidad.
 
 ---
@@ -61,12 +60,14 @@ src/
 │   └── configuracion.tsx
 ├── components/
 │   ├── ui/                 # Text, Card, Button, Screen, MetricCard, etc.
+│   ├── appearance-sync.tsx # Aplica la apariencia guardada
 │   ├── app-gate.tsx        # Carga / configuración requerida
 │   ├── app-tabs.tsx        # NativeTabs (5 secciones)
 │   └── statistics/         # Gráfica de barras de ventas por día
 ├── config/firebase.ts      # Inicialización condicional de Firebase
 ├── constants/              # Tema, paleta y valores de negocio
-├── hooks/                  # Sesión, tema, configuración y estadísticas
+├── context/                # SettingsProvider (configuración compartida)
+├── hooks/                  # Sesión, tema, configuración, fechas y estadísticas
 ├── lib/                    # Dinero (centavos) y fechas
 ├── services/               # Acceso a Firestore por dominio
 └── types/models.ts         # Esquemas de datos
@@ -85,7 +86,7 @@ firebase/
 - **`NativeTabs`** solo funciona en Expo SDK 58+; cada pestaña con historial usa un `Stack` anidado.
 - **Operaciones financieras atómicas** con `runTransaction` e IDs generados en la UI para idempotencia.
 
-Guías de prueba: [`docs/ETAPA_2.md`](docs/ETAPA_2.md), [`docs/ETAPA_3.md`](docs/ETAPA_3.md) y [`docs/ETAPA_4.md`](docs/ETAPA_4.md).
+Guías de prueba: [`docs/ETAPA_2.md`](docs/ETAPA_2.md), [`docs/ETAPA_3.md`](docs/ETAPA_3.md), [`docs/ETAPA_4.md`](docs/ETAPA_4.md) y [`docs/ETAPA_5.md`](docs/ETAPA_5.md).
 
 ## Git
 
