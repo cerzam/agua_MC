@@ -11,6 +11,7 @@ import { SectionHeader } from '@/components/ui/section-header';
 import { AppText } from '@/components/ui/text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
+import { useDateFormat } from '@/hooks/use-date-format';
 import { useTheme } from '@/hooks/use-theme';
 import { formatCurrency } from '@/lib/money';
 import { getCustomer } from '@/services/customers.service';
@@ -22,13 +23,9 @@ function firstParam(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
 
-function formatDate(timestamp: { toDate: () => Date } | undefined): string {
-  const date = timestamp?.toDate?.() ?? new Date(0);
-  return date.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
 export default function ClienteDetalleScreen() {
   const theme = useTheme();
+  const formatDate = useDateFormat();
   const params = useLocalSearchParams<{ id: string }>();
   const customerId = firstParam(params.id);
   const { uid } = useAuth();

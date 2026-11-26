@@ -12,6 +12,7 @@ import { SectionHeader } from '@/components/ui/section-header';
 import { AppText } from '@/components/ui/text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useAuth } from '@/hooks/use-auth';
+import { useDateFormat } from '@/hooks/use-date-format';
 import { useExpenses, type ExpensesPeriod } from '@/hooks/use-expenses';
 import { useTheme } from '@/hooks/use-theme';
 import { formatCurrency } from '@/lib/money';
@@ -27,6 +28,7 @@ const PERIOD_OPTIONS: { value: ExpensesPeriod; label: string }[] = [
 
 export default function GastosScreen() {
   const theme = useTheme();
+  const formatDate = useDateFormat();
   const { uid } = useAuth();
   const [period, setPeriod] = useState<ExpensesPeriod>('month');
   const { expenses, loading, error, reload } = useExpenses(period);
@@ -102,31 +104,27 @@ export default function GastosScreen() {
         </Card>
       ) : (
         <Card style={styles.list}>
-          {expenses.map((expense) => {
-            const date = expense.createdAt?.toDate?.() ?? new Date(0);
-            return (
-              <View key={expense.id} style={styles.row}>
-                <View style={styles.rowInfo}>
-                  <AppText variant="label" numberOfLines={1}>{expense.concept}</AppText>
-                  <AppText variant="caption" tone="secondary">
-                    {expense.category} ·{' '}
-                    {date.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })}
-                  </AppText>
-                </View>
-                <AppText variant="label" tone="danger">
-                  −{formatCurrency(expense.amountCents)}
+          {expenses.map((expense) => (
+            <View key={expense.id} style={styles.row}>
+              <View style={styles.rowInfo}>
+                <AppText variant="label" numberOfLines={1}>{expense.concept}</AppText>
+                <AppText variant="caption" tone="secondary">
+                  {expense.category} · {formatDate(expense.createdAt, false)}
                 </AppText>
-                <Pressable
-                  accessibilityLabel={`Eliminar ${expense.concept}`}
-                  onPress={() => handleDelete(expense)}
-                  disabled={deleting}
-                  hitSlop={8}
-                  style={styles.deleteButton}>
-                  <Trash2 size={18} color={theme.danger} />
-                </Pressable>
               </View>
-            );
-          })}
+              <AppText variant="label" tone="danger">
+                −{formatCurrency(expense.amountCents)}
+              </AppText>
+              <Pressable
+                accessibilityLabel={`Eliminar ${expense.concept}`}
+                onPress={() => handleDelete(expense)}
+                disabled={deleting}
+                hitSlop={8}
+                style={styles.deleteButton}>
+                <Trash2 size={18} color={theme.danger} />
+              </Pressable>
+            </View>
+          ))}
         </Card>
       )}
     </Screen>

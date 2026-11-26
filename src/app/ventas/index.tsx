@@ -11,6 +11,7 @@ import { SectionHeader } from '@/components/ui/section-header';
 import { AppText } from '@/components/ui/text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useBusinessSettings } from '@/hooks/use-business-settings';
+import { useDateFormat } from '@/hooks/use-date-format';
 import { useSales, type SalesPeriod } from '@/hooks/use-sales';
 import { useTheme } from '@/hooks/use-theme';
 import { formatCurrency } from '@/lib/money';
@@ -94,7 +95,7 @@ export default function VentasScreen() {
 
 function SaleRow({ sale, currency }: { sale: Sale; currency?: string }) {
   const theme = useTheme();
-  const date = sale.createdAt?.toDate?.() ?? new Date(0);
+  const formatDate = useDateFormat();
   const statusColor =
     sale.paymentStatus === 'paid' ? theme.success : sale.paymentStatus === 'partial' ? theme.warning : theme.danger;
 
@@ -108,8 +109,7 @@ function SaleRow({ sale, currency }: { sale: Sale; currency?: string }) {
           {sale.customerName ?? 'Público general'}
         </AppText>
         <AppText variant="caption" tone="secondary">
-          {sale.quantity} garrafón{sale.quantity === 1 ? '' : 'es'} ·{' '}
-          {date.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}
+          {sale.quantity} garrafón{sale.quantity === 1 ? '' : 'es'} · {formatDate(sale.createdAt)}
         </AppText>
         <AppText variant="caption" style={{ color: statusColor }}>
           {STATUS_LABEL[sale.paymentStatus]}

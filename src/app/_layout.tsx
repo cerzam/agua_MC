@@ -3,9 +3,11 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'react-native';
 
+import { AppearanceSync } from '@/components/appearance-sync';
 import { AppGate } from '@/components/app-gate';
 import AppTabs from '@/components/app-tabs';
 import { Colors } from '@/constants/theme';
+import { SettingsProvider } from '@/context/settings-context';
 import { AuthProvider } from '@/hooks/use-auth';
 
 SplashScreen.preventAutoHideAsync();
@@ -28,12 +30,15 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <ThemeProvider value={routerTheme}>
-        <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-        <AppGate>
-          <AppTabs />
-        </AppGate>
-      </ThemeProvider>
+      <SettingsProvider>
+        <AppearanceSync />
+        <ThemeProvider value={routerTheme}>
+          <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+          <AppGate>
+            <AppTabs />
+          </AppGate>
+        </ThemeProvider>
+      </SettingsProvider>
     </AuthProvider>
   );
 }

@@ -12,6 +12,7 @@ import { AppText } from '@/components/ui/text';
 import { SalesChart } from '@/components/statistics/sales-chart';
 import { Radius, Spacing } from '@/constants/theme';
 import { useBusinessSettings } from '@/hooks/use-business-settings';
+import { useDateFormat } from '@/hooks/use-date-format';
 import { useStatistics } from '@/hooks/use-statistics';
 import { useTheme } from '@/hooks/use-theme';
 import { formatCurrency } from '@/lib/money';
@@ -127,6 +128,7 @@ function SummaryMetrics({
 export default function EstadisticasScreen() {
   const theme = useTheme();
   const { settings } = useBusinessSettings();
+  const formatDate = useDateFormat();
   const currency = settings?.currency ?? 'MXN';
 
   const [period, setPeriod] = useState<StatsPeriod>('week');
@@ -220,7 +222,9 @@ export default function EstadisticasScreen() {
       {data && !loading && !error ? (
         <>
           <AppText variant="caption" tone="secondary">
-            {data.rangeLabel}
+            {data.range.from && data.range.to
+              ? `${formatDate(data.range.from)} — ${formatDate(data.range.to)}`
+              : 'Todo el historial'}
           </AppText>
 
           {data.hasData ? (
