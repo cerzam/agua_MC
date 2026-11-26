@@ -26,6 +26,12 @@ export const firebaseConfigError = isFirebaseConfigured
   ? null
   : 'Faltan variables EXPO_PUBLIC_FIREBASE_* en el archivo .env. Consulta docs/FIREBASE_SETUP.md.';
 
+console.log('[Agua MC] Firebase config:', {
+  configured: isFirebaseConfigured,
+  projectId: projectId ?? null,
+  authDomain: authDomain ?? null,
+});
+
 let firebaseApp: FirebaseApp | null = null;
 let firestore: Firestore | null = null;
 let auth: Auth | null = null;

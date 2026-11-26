@@ -56,6 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!signInStarted.current) {
           signInStarted.current = true;
           ensureAnonymousSession().catch((error: unknown) => {
+            console.error('[Agua MC] AuthProvider: no se pudo iniciar sesión', error);
             if (active) {
               setState({
                 status: 'error',
